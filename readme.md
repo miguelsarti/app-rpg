@@ -17,3 +17,13 @@ Foram adicionados dois botões de filtro:
 - **Mostrar Disponíveis:** exibe apenas os personagens disponíveis.
 
 O botão ativo fica destacado, facilitando a navegação e o entendimento do estado atual da lista.
+
+# OBSERVAÇÃO
+
+Fora permitido pelo professor Felipe que houvesse a realização da atividade em trio, sendo ele composto por:
+- Miguel Sarti
+- Sarah Ribeiro
+- Vitor Argeri
+
+Todos commits relacionados à atividade foram realizados na conta do VitorArgeri pois decidimos utilizar o live share, pois sentimos que que seria muito mais fácil.
+Obrigado pela a atenção.
