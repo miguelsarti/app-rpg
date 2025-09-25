@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, Button, TextInput, Alert } from "react-native"
+import { View, StyleSheet } from "react-native";
+import { Button, TextInput } from "react-native-paper";
 
-export default function AddcCharacterForm() {
+export default function AddCharacterForm({ newCharacter, setNewCharacter, addCharacter }) {
     return (
         <View style={styles.container}>
             <TextInput
@@ -46,4 +47,4 @@ const styles = StyleSheet.create({
         backgroundColor: "#E69A28",
         margin: 10
     }
-})
+});

@@ -15,6 +15,8 @@ import {
   TextInput,
   Snackbar,
 } from "react-native-paper";
+import AddCharacterForm from "./components/AddCharacterForm/AddCharacterForm";
+import CharacterCard from "./components/CharacterCard/CharacterCard";
 
 export default function App() {
   const [characters, setCharacters] = useState([
@@ -54,40 +56,40 @@ export default function App() {
   }
 
   function toggleRecruit(character) {
-  // Se o personagem está recrutado (1), pede confirmação antes de tirar
-  if (character.recruited === 1) {
-    Alert.alert(
-      "Tornar disponível",
-      `Deseja realmente tornar "${character.name}" disponível?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Confirmar",
-          onPress: () => {
-            const newCharacters = characters.map((currentChar) =>
-              currentChar.id === character.id
-                ? { ...currentChar, recruited: 0 }
-                : currentChar
-            );
-            setCharacters(newCharacters);
-            setSnackbarMsg("Personagem marcado como disponível!");
-            setSnackbarVisible(true);
+    // Se o personagem está recrutado (1), pede confirmação antes de tirar
+    if (character.recruited === 1) {
+      Alert.alert(
+        "Tornar disponível",
+        `Deseja realmente tornar "${character.name}" disponível?`,
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Confirmar",
+            onPress: () => {
+              const newCharacters = characters.map((currentChar) =>
+                currentChar.id === character.id
+                  ? { ...currentChar, recruited: 0 }
+                  : currentChar
+              );
+              setCharacters(newCharacters);
+              setSnackbarMsg("Personagem marcado como disponível!");
+              setSnackbarVisible(true);
+            }
           }
-        }
-      ]
-    );
-  } else {
-    // Se não está recrutado, recruta normalmente
-    const newCharacters = characters.map((currentChar) =>
-      currentChar.id === character.id
-        ? { ...currentChar, recruited: 1 }
-        : currentChar
-    );
-    setCharacters(newCharacters);
-    setSnackbarMsg("Personagem recrutado!");
-    setSnackbarVisible(true);
+        ]
+      );
+    } else {
+      // Se não está recrutado, recruta normalmente
+      const newCharacters = characters.map((currentChar) =>
+        currentChar.id === character.id
+          ? { ...currentChar, recruited: 1 }
+          : currentChar
+      );
+      setCharacters(newCharacters);
+      setSnackbarMsg("Personagem recrutado!");
+      setSnackbarVisible(true);
+    }
   }
-}
 
   function removeCharacter(item) {
     Alert.alert(
@@ -110,24 +112,11 @@ export default function App() {
 
   function renderCharacter({ item }) {
     return (
-      <Card
-        style={[
-          styles.character,
-          item.recruited ? styles.characterRecruited : null
-        ]}
-        onPress={() => toggleRecruit(item)}
-        onLongPress={() => removeCharacter(item)}
-      >
-        <Card.Title
-          title={item.name}
-          titleStyle={{ color: "#fff", fontWeight: "bold" }}
-          right={() => (
-            <Text style={{ color: "#E69A28", fontSize: 24, marginRight: 16 }}>
-              {item.recruited ? "⭐" : "🗡️"}
-            </Text>
-          )}
-        />
-      </Card>
+      <CharacterCard
+        item={item}
+        onToggleRecruit={toggleRecruit}
+        onRemove={removeCharacter}
+      />
     );
   }
 
@@ -139,28 +128,11 @@ export default function App() {
         <Text style={styles.subtitle}>
           ⭐ Recrutado • 🗡️ Disponível • Segure para remover
         </Text>
-        <View style={styles.inputRow}>
-          <TextInput
-            mode="outlined"
-            style={styles.input}
-            placeholder="🧑‍🎤 Nome do novo personagem…"
-            value={newCharacter}
-            onChangeText={setNewCharacter}
-            onSubmitEditing={addCharacter}
-            theme={{ colors: { primary: "#E69A28" } }}
-          />
-          <Button
-            mode="contained"
-            onPress={addCharacter}
-            style={styles.button}
-            contentStyle={{ height: 48 }}
-            labelStyle={{ fontSize: 22, color: "#1A0E0A" }}
-            buttonColor="#E69A28"
-          >
-            ➕
-          </Button>
-        </View>
-        <View style={{ flexDirection: "row", justifyContent: "center" }}>
+        <AddCharacterForm
+          newCharacter={newCharacter}
+          setNewCharacter={setNewCharacter}
+          addCharacter={addCharacter}
+        />        <View style={{ flexDirection: "row", justifyContent: "center" }}>
           <Button
             style={[
               styles.button,
@@ -236,26 +208,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  input: {
-    flex: 1,
-    marginRight: 10,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-  },
   list: {
     flex: 1,
-  },
-  character: {
-    backgroundColor: "#2C1810",
-    borderRadius: 8,
-    marginBottom: 12,
-    borderWidth: 0,
-    elevation: 4,
-  },
-  characterRecruited: {
-    backgroundColor: "#58180D",
-    borderColor: "#E69A28",
-    borderWidth: 2,
   },
   button: {
     borderRadius: 8,
