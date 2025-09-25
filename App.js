@@ -13,7 +13,7 @@ import {
   Card,
   Button,
   TextInput,
-  Avatar,
+  Snackbar,
 } from "react-native-paper";
 
 export default function App() {
@@ -23,26 +23,89 @@ export default function App() {
     { id: 3, name: "🏹 Legolas o Arqueiro", recruited: 0 }
   ]);
   const [newCharacter, setNewCharacter] = useState("");
+  const [showRecruited, setShowRecruited] = useState(true);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState("");
 
   function addCharacter() {
     if (newCharacter === "") return;
-    const newId = characters.length > 0 ? Math.max(...characters.map(c => c.id)) + 1 : 1;
-    const newCharacterObj = {
-      id: newId,
-      name: newCharacter,
-      recruited: 0
-    };
-    setCharacters([newCharacterObj, ...characters]);
-    setNewCharacter("");
+    Alert.alert(
+      "Adicionar personagem",
+      `Deseja adicionar "${newCharacter}" à lista?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Adicionar",
+          onPress: () => {
+            const newId = characters.length > 0 ? Math.max(...characters.map(c => c.id)) + 1 : 1;
+            const newCharacterObj = {
+              id: newId,
+              name: newCharacter,
+              recruited: 0
+            };
+            setCharacters([newCharacterObj, ...characters]);
+            setNewCharacter("");
+            setSnackbarMsg("Personagem adicionado!");
+            setSnackbarVisible(true);
+          }
+        }
+      ]
+    );
   }
 
   function toggleRecruit(character) {
+  // Se o personagem está recrutado (1), pede confirmação antes de tirar
+  if (character.recruited === 1) {
+    Alert.alert(
+      "Tornar disponível",
+      `Deseja realmente tornar "${character.name}" disponível?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Confirmar",
+          onPress: () => {
+            const newCharacters = characters.map((currentChar) =>
+              currentChar.id === character.id
+                ? { ...currentChar, recruited: 0 }
+                : currentChar
+            );
+            setCharacters(newCharacters);
+            setSnackbarMsg("Personagem marcado como disponível!");
+            setSnackbarVisible(true);
+          }
+        }
+      ]
+    );
+  } else {
+    // Se não está recrutado, recruta normalmente
     const newCharacters = characters.map((currentChar) =>
       currentChar.id === character.id
-        ? { ...currentChar, recruited: currentChar.recruited ? 0 : 1 }
+        ? { ...currentChar, recruited: 1 }
         : currentChar
     );
     setCharacters(newCharacters);
+    setSnackbarMsg("Personagem recrutado!");
+    setSnackbarVisible(true);
+  }
+}
+
+  function removeCharacter(item) {
+    Alert.alert(
+      "Remover personagem",
+      `Deseja remover ${item.name}?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Remover",
+          style: "destructive",
+          onPress: () => {
+            setCharacters(characters.filter((c) => c.id !== item.id));
+            setSnackbarMsg("Personagem removido!");
+            setSnackbarVisible(true);
+          }
+        }
+      ]
+    );
   }
 
   function renderCharacter({ item }) {
@@ -53,21 +116,7 @@ export default function App() {
           item.recruited ? styles.characterRecruited : null
         ]}
         onPress={() => toggleRecruit(item)}
-        onLongPress={() =>
-          Alert.alert(
-            "Remover personagem",
-            `Deseja remover ${item.name}?`,
-            [
-              { text: "Cancelar", style: "cancel" },
-              {
-                text: "Remover",
-                style: "destructive",
-                onPress: () =>
-                  setCharacters(characters.filter((c) => c.id !== item.id))
-              }
-            ]
-          )
-        }
+        onLongPress={() => removeCharacter(item)}
       >
         <Card.Title
           title={item.name}
@@ -111,13 +160,53 @@ export default function App() {
             ➕
           </Button>
         </View>
+        <View style={{ flexDirection: "row", justifyContent: "center" }}>
+          <Button
+            style={[
+              styles.button,
+              { marginBottom: 10 },
+              showRecruited
+                ? { backgroundColor: "#E69A28", borderWidth: 2, borderColor: "#E69A28" }
+                : { backgroundColor: "transparent", borderWidth: 2, borderColor: "#E69A28" }
+            ]}
+            onPress={() => setShowRecruited(true)}
+            textColor={showRecruited ? "#1A0E0A" : "#E69A28"}
+          >
+            <Text style={{ fontWeight: showRecruited ? "bold" : "normal" }}>⚔️ Mostrar Recrutados</Text>
+          </Button>
+          <Button
+            style={[
+              styles.button,
+              { marginBottom: 10 },
+              !showRecruited
+                ? { backgroundColor: "#E69A28", borderWidth: 2, borderColor: "#E69A28" }
+                : { backgroundColor: "transparent", borderWidth: 2, borderColor: "#E69A28" }
+            ]}
+            onPress={() => setShowRecruited(false)}
+            textColor={!showRecruited ? "#1A0E0A" : "#E69A28"}
+          >
+            <Text style={{ fontWeight: !showRecruited ? "bold" : "normal" }}>😎 Mostrar Disponíveis</Text>
+          </Button>
+        </View>
         <FlatList
-          data={characters.filter(character => character.recruited == 1)}
+          data={
+            showRecruited
+              ? characters.filter(character => character.recruited == 1)
+              : characters.filter(character => character.recruited !== 1)
+          }
           keyExtractor={(item) => String(item.id)}
           renderItem={renderCharacter}
           style={styles.list}
           contentContainerStyle={{ paddingBottom: 20 }}
         />
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={2000}
+          style={{ backgroundColor: "#E69A28" }}
+        >
+          <Text style={{ color: "#1A0E0A", fontWeight: "bold" }}>{snackbarMsg}</Text>
+        </Snackbar>
       </SafeAreaView>
     </PaperProvider>
   );
@@ -153,10 +242,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 8,
   },
-  button: {
-    borderRadius: 8,
-    justifyContent: "center",
-  },
   list: {
     flex: 1,
   },
@@ -171,5 +256,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#58180D",
     borderColor: "#E69A28",
     borderWidth: 2,
+  },
+  button: {
+    borderRadius: 8,
+    justifyContent: "center",
+    backgroundColor: "#E69A28",
+    margin: 10
   },
 });
