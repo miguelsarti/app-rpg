@@ -1,51 +1,41 @@
 import React, { useState } from "react";
 import {
-  SafeAreaView,      // 🛡️ Área segura da tela
-  View,              // 📦 Container básico
-  Text,              // 📝 Texto na tela
-  TextInput,         // 🧾 Campo de entrada
-  TouchableOpacity,  // 👆 Botão tocável
-  FlatList,          // 📋 Lista de itens
-  StyleSheet,        // 🎨 Estilos CSS-like
-  Alert,             // 🚨 Alertas nativos
+  SafeAreaView,
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Alert,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import {
+  Provider as PaperProvider,
+  Card,
+  Button,
+  TextInput,
+  Avatar,
+} from "react-native-paper";
 
 export default function App() {
-  // 🦸 Lista de personagens (estado inicial com 3 heróis)
   const [characters, setCharacters] = useState([
     { id: 1, name: "🧙 Gandalf o Mago", recruited: 0 },
     { id: 2, name: "⚔️ Aragorn o Guerreiro", recruited: 1 },
     { id: 3, name: "🏹 Legolas o Arqueiro", recruited: 0 }
   ]);
-
-  // ✍️ Texto do novo personagem (começa vazio)
   const [newCharacter, setNewCharacter] = useState("");
 
-  // 🆕 Adicionar novo personagem à party
   function addCharacter() {
-    // 🚫 Se estiver vazio, não adicionar
     if (newCharacter === "") return;
-
-    // 🆔 ID simples: próximo número
     const newId = characters.length > 0 ? Math.max(...characters.map(c => c.id)) + 1 : 1;
-
-    // 🛠️ Criar objeto do novo personagem
     const newCharacterObj = {
       id: newId,
       name: newCharacter,
-      recruited: 0 // Começa não recrutado
+      recruited: 0
     };
-
-    // 📋 Colocar novo personagem no topo da lista
-    const allCharacters = [newCharacterObj, ...characters];
-
-    // ✨ Atualizar estado e limpar campo
-    setCharacters(allCharacters);
+    setCharacters([newCharacterObj, ...characters]);
     setNewCharacter("");
   }
 
-  // ⭐ Recrutar/dispensar personagem
   function toggleRecruit(character) {
     const newCharacters = characters.map((currentChar) =>
       currentChar.id === character.id
@@ -55,10 +45,9 @@ export default function App() {
     setCharacters(newCharacters);
   }
 
-  // 🧑‍🎤 Renderizar personagem na lista
   function renderCharacter({ item }) {
     return (
-      <TouchableOpacity
+      <Card
         style={[
           styles.character,
           item.recruited ? styles.characterRecruited : null
@@ -80,62 +69,72 @@ export default function App() {
           )
         }
       >
-        <Text style={{ color: "#fff" }}>{item.name}</Text>
-        <Text style={{ color: "#E69A28" }}>
-          {item.recruited ? "⭐" : "🗡️"}
-        </Text>
-      </TouchableOpacity>
+        <Card.Title
+          title={item.name}
+          titleStyle={{ color: "#fff", fontWeight: "bold" }}
+          right={() => (
+            <Text style={{ color: "#E69A28", fontSize: 24, marginRight: 16 }}>
+              {item.recruited ? "⭐" : "🗡️"}
+            </Text>
+          )}
+        />
+      </Card>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-
-      {/* 🏰 Título do App */}
-      <Text style={styles.title}>🏰 Minha Party RPG</Text>
-      <Text style={styles.subtitle}>
-        ⭐ Recrutado • 🗡️ Disponível • Segure para remover
-      </Text>
-
-      {/* ✍️ Campo para adicionar personagem */}
-      <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
-          placeholder="🧑‍🎤 Nome do novo personagem…"
-          value={newCharacter}
-          onChangeText={setNewCharacter}
-          onSubmitEditing={addCharacter}
+    <PaperProvider>
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+        <Text style={styles.title}>🏰 Minha Party RPG</Text>
+        <Text style={styles.subtitle}>
+          ⭐ Recrutado • 🗡️ Disponível • Segure para remover
+        </Text>
+        <View style={styles.inputRow}>
+          <TextInput
+            mode="outlined"
+            style={styles.input}
+            placeholder="🧑‍🎤 Nome do novo personagem…"
+            value={newCharacter}
+            onChangeText={setNewCharacter}
+            onSubmitEditing={addCharacter}
+            theme={{ colors: { primary: "#E69A28" } }}
+          />
+          <Button
+            mode="contained"
+            onPress={addCharacter}
+            style={styles.button}
+            contentStyle={{ height: 48 }}
+            labelStyle={{ fontSize: 22, color: "#1A0E0A" }}
+            buttonColor="#E69A28"
+          >
+            ➕
+          </Button>
+        </View>
+        <FlatList
+          data={characters.filter(character => character.recruited == 1)}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderCharacter}
+          style={styles.list}
+          contentContainerStyle={{ paddingBottom: 20 }}
         />
-        <TouchableOpacity style={styles.button} onPress={addCharacter}>
-          <Text style={styles.buttonText}>➕</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* 📋 Lista de personagens */}
-      <FlatList
-        data={characters}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={renderCharacter}
-        style={styles.list}
-      />
-    </SafeAreaView>
+      </SafeAreaView>
+    </PaperProvider>
   );
 }
 
-// 🎨 Estilos com tema D&D épico!
 const styles = StyleSheet.create({
   container: {
-    flex: 1,                        // Ocupar tela toda
-    backgroundColor: "#1A0E0A",     // 🏰 Preto D&D
-    paddingTop: 50,                 // Espaço do topo
-    paddingHorizontal: 20,          // Espaço lateral
+    flex: 1,
+    backgroundColor: "#1A0E0A",
+    paddingTop: 50,
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 28,                   // Tamanho grande
-    fontWeight: "bold",             // Texto em negrito
-    textAlign: "center",            // Centralizado
-    color: "#E69A28",               // 🟠 Dourado D&D
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#E69A28",
   },
   subtitle: {
     fontSize: 16,
@@ -150,38 +149,27 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    marginRight: 10,
     backgroundColor: "#fff",
     borderRadius: 8,
-    padding: 10,
-    marginRight: 10,
-    fontSize: 16,
   },
   button: {
-    backgroundColor: "#E69A28",
-    padding: 12,
     borderRadius: 8,
-    alignItems: "center",
     justifyContent: "center",
-  },
-  buttonText: {
-    color: "#1A0E0A",
-    fontWeight: "bold",
-    fontSize: 18,
   },
   list: {
     flex: 1,
   },
   character: {
-    backgroundColor: "#2C1810",     // 🤎 Marrom D&D
-    padding: 15,
-    borderRadius: 8,                // Bordas arredondadas
-    marginBottom: 10,               // Espaço entre itens
-    flexDirection: "row",           // Lado a lado
-    justifyContent: "space-between",
+    backgroundColor: "#2C1810",
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 0,
+    elevation: 4,
   },
   characterRecruited: {
-    backgroundColor: "#58180D",     // 🔴 Vermelho para recrutado
-    borderColor: "#E69A28",         // Borda dourada
+    backgroundColor: "#58180D",
+    borderColor: "#E69A28",
     borderWidth: 2,
   },
 });
